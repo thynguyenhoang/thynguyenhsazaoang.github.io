@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Projects on Thy Nguyen</title>
+    <link>/project/</link>
+    <description>Recent content in Projects on Thy Nguyen</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-US</language><atom:link href="/project/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Project 2: Modeling, Testing, and Predicting</title>
+      <link>/project/project2/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project/project2/</guid>
+      <description>Introduction The data I chose to use is called “Stud”. This data set includes 395 observations and the data were obtained in a survey of students math and portuguese language courses in secondary school. It contains a lot of interesting social, gender and study information about students and their alcohol consumption in regards to these variables. There are 30 variables in total, some are age, school, sex, family size, parent’s cohabitation status (Pstatus), number of past class failures(failures),weekend alcohol consumption (Walc,numeric: from 1 - very low to 5 - very high), etc.</description>
+    </item>
+    
+  </channel>
+</rss>

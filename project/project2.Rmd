@@ -1,0 +1,222 @@
+---
+title: 'Project 2: Modeling, Testing, and Predicting'
+author: "Thy Nguyen Thn553"
+date: ''
+output:
+  html_document:
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, fig.align = "center", warning = F, message = F, tidy=T, tidy.opts=list(width.cutoff=50), R.options=list(max.print=100,dplyr.print_max=100))
+```
+
+## Introduction
+
+The data I chose to use is called "Stud". This data set includes 395 observations and the data were obtained in a survey of students math and portuguese language courses in secondary school. It contains a lot of interesting social, gender and study information about students and their alcohol consumption in regards to these variables. There are 30 variables in total, some are age, school, sex, family size, parent's cohabitation status (Pstatus), number of past class failures(failures),weekend alcohol consumption (Walc,numeric: from 1 - very low to 5 - very high), etc.
+## MANOVA Testing
+```{R}
+stud <- read.csv("stud.csv")
+stud <- data.frame(stud)
+man1<-manova(cbind(age, absences)~Walc, data=stud)
+summary(man1)
+summary.aov(man1)
+pairwise.t.test(stud$age,stud$Walc, p.adj="none")
+pairwise.t.test(stud$absences,stud$Walc, p.adj="none")
+library(rstatix)
+group <- stud$Walc
+X <- stud %>% select(age,absences)
+sapply(split(X,group), mshapiro_test)
+```
+*I conducted 1 MANOVA, 1 ANOVA, and 2 t-tests. The MANOVA provided significant differences among the individual students for at least once of numerical variables. Pillai = 0.027574, F = 5.5577 , and p = 0.004168. Univariate ANOVAs were performed as a follow-up and for age the statistics are the following: F = 5.4806 and p = 0.01973. For absences, the statistics are the following: F = 7.4382 and p = 0.006671. Pairwise comparisons (t-tests) were also conducted and since age and absences differed.*
+
+
+## Randomisation Test
+
+```{R}
+library(tidyverse)
+library(vegan)
+stud %>% group_by(sex) %>% summarise(means = mean(Walc)) %>% summarise(mean_diff = diff(means))
+rand_dist <- vector()
+for (i in 1:5000) {
+  new <- data.frame(Walc = sample(stud$Walc), sex = stud$sex)
+  rand_dist[i] <- mean(new[new$sex =="M", ]$Walc) - mean(new[new$sex == "F", ]$Walc)
+}
+{hist(rand_dist,main="",ylab=""); abline(v = c(-0.119127, 0.119127),col="blue")}
+mean(rand_dist> 0.119127 | rand_dist < -0.119127) 
+```
+*H0 is The amount of weekend alcohol consumption among individuals is the same for males and females. HA: The amount of weekend alcohol consumption among individuals is not the same for males and females. The calculated p-value is 0.3486, therefore, H0 is rejected.*
+
+## Linear Regression Model
+```{R}
+library(lmtest)
+library(sandwich)
+stud$freetime <- stud$freetime - mean(stud$freetime)
+stud$goout <- stud$goout - mean(stud$goout)
+fit1 <- lm(goout ~ sex*freetime, data=stud)
+summary(fit1)
+coef(fit1)
+stud %>% ggplot(aes(goout, freetime))+geom_point()+geom_smooth(method = 'lm',se=F)
+cor(stud$freetime, stud$goout)
+res<-fit1$residuals
+fitvals<-fit1$fitted.values
+ggplot()+geom_point(aes(fitvals,res))+geom_hline(yintercept=0, color='red')
+ggplot()+geom_histogram(aes(res))
+ggplot()+geom_qq(aes(sample=res))+geom_qq()
+coeftest(fit1)[,1:2]
+coeftest(fit1, vcov=vcovHC(fit1))[,1:2]
+fit <- lm(goout~freetime, data=stud)
+SST <- sum((stud$freetime-mean(stud$freetime))^2) 
+SST <- sum((stud$freetime-mean(stud$freetime))^2) 
+SSR <- sum((fit$fitted.values-mean(stud$freetime))^2)
+SSE <- sum(fit$residuals^2) 
+SSR/SST
+```
+*The coefficient was positive, so this would indicate that the when the go out variable (x-axis) increases, the mean of the free time variable (y-axis) will also increase. A ggplot was created to show the interactions between the two variables that have had their mean centered according to the rubric. Homoskedasticity, normality and linearity was violated. My model explains 99.42% of the variation outcome.*
+
+## Bootstrap Linear Regression Model:
+
+```{R}
+sampl<-replicate(5000, {
+boot_dis<-boot_dis<-stud[sample(nrow(stud),replace=TRUE),]
+fit<-lm(goout ~ sex*freetime, data=boot_dis)
+coef(fit)
+})
+sampl%>%t%>%as.data.frame%>%summarize_all(sd)
+```
+*The standard error for the bootstrap is the highest.*
+
+## Logistic Regression Model
+
+```{R}
+library(lmtest)
+library(plotROC)
+data <- stud%>%mutate(y=ifelse(sex=="F",1,0))
+head(data)
+ft<-glm(y~studytime,data=data,,family=binomial(link="logit"))
+coeftest(ft)
+exp(coef(fit1))
+logistic<-function(x){exp(x)/(1+exp(x))}
+#confusion matrix
+table(truth=data$sex, prediction=data$Walc>1)%>%addmargins
+#accuracy
+(114+130)/395
+#specificity
+130/187
+#sensitivity
+114/208
+#precision
+114/244
+#AUC
+widths<-diff(data$y)
+heights<-vector()
+for(i in 1:100) heights[i]<-data$y[i]+data$y[i+1]
+AUC<-sum(heights*widths/2)
+AUC%>%round(3)
+stud$logit<-predict(ft,type="link")
+stud%>%ggplot()+geom_density(aes(logit,color=sex,fill=sex), alpha=.4)+theme(legend.position=c(.3,.6))+geom_vline(xintercept=2)+xlab("logit (log-odds)") +geom_rug(aes(logit,color=sex))
+#ROC
+library(plotROC)
+ROCplot<-ggplot(data)+geom_roc(aes(d=y,m=Walc), n.cuts=0)
+ROCplot
+calc_auc(ROCplot)
+```
+*The coefficient intercept estimate is -1.53620. A confusion matrix table was computed to calculate accuracy (0.6177215), sensitivity (0.5480769), specificity (0.6951872) and precision (0.4672131). The AUC that was calculated is -3.5, which is considered a bad AUC. A density plot was also generated to visualise accuracy, sensitivity, specificity and precision.*
+## Logistic Regression Model 2
+
+```{R}
+#fit model
+library(tidyverse)
+library(lmtest)
+library(pROC)
+library(glmnet)
+class_diag<-function(probs,truth){
+  
+  tab<-table(factor(probs>.5,levels=c("FALSE","TRUE")),truth)
+  acc=sum(diag(tab))/sum(tab)
+  sens=tab[2,2]/colSums(tab)[2]
+  spec=tab[1,1]/colSums(tab)[1]
+  ppv=tab[2,2]/rowSums(tab)[2]
+
+  if(is.numeric(truth)==FALSE & is.logical(truth)==FALSE) truth<-as.numeric(truth)-1
+  
+  #CALCULATE EXACT AUC
+  ord<-order(probs, decreasing=TRUE)
+  probs <- probs[ord]; truth <- truth[ord]
+  
+  TPR=cumsum(truth)/max(1,sum(truth)) 
+  FPR=cumsum(!truth)/max(1,sum(!truth))
+  
+  dup<-c(probs[-1]>=probs[-length(probs)], FALSE)
+  TPR<-c(0,TPR[!dup],1); FPR<-c(0,FPR[!dup],1)
+  
+  n <- length(TPR)
+  auc<- sum( ((TPR[-1]+TPR[-n])/2) * (FPR[-1]-FPR[-n]) )
+
+  data.frame(acc,sens,spec,ppv,auc)
+}
+
+k=10
+data1<-data[sample(nrow(data)),]
+folds<-cut(seq(1:nrow(data)),breaks=k,labels=F)
+
+diags<-NULL 
+for(i in 1:k){
+  train<-data1[folds!=i,]   
+  test<-data1[folds==i,]
+  truth<-test$y
+  fit<-glm(y~Walc,data=train,family="binomial")
+  probs<-predict(fit,newdata = test,type="response")
+  diags<-rbind(diags,class_diag(probs,truth)) 
+}
+
+apply(diags,2,mean)
+
+#10-fold
+k=10
+data <- stud %>% sample_frac
+data$binary<-ifelse(data$sex=="F",1,0)
+folds <- ntile(1:nrow(data),n=10) 
+diags<-NULL
+for(i in 1:k){
+train <- data[folds!=i,] 
+test <- data[folds==i,] 
+truth <- test$binary 
+fit <- glm(binary~studytime+Medu+traveltime+famrel+freetime+goout+Dalc+absences,
+data=train, family="binomial")
+probs <- predict(fit, newdata=test, type="response")
+diags<-rbind(diags,class_diag(probs,truth))
+}
+diags%>%summarize_all(mean)
+#LASSO
+data$binary<-ifelse(data$sex=="F",1,0)
+y<-as.matrix(data$binary)
+x<-model.matrix(binary~studytime+Medu+traveltime+famrel+freetime+goout+Dalc+absences,data=data)[,-1]
+head(x)
+x<-scale(x)
+head(x)
+cv<-cv.glmnet(x,y,family="binomial")
+lasso<-glmnet(x,y,family="binomial",lambda=cv$lambda.1se)
+coef(lasso)
+
+#10-fold CV
+k=10
+data <- stud %>% sample_frac 
+folds <- ntile(1:nrow(data),n=10) 
+data$binary<-ifelse(data$sex=="F",1,0)
+diags<-NULL
+for(i in 1:k){
+train <- data[folds!=i,] 
+test <- data[folds==i,] 
+truth <- test$binary 
+fit <- glm(binary~Dalc+Walc+freetime,
+data=train, family="binomial")
+probs <- predict(fit, newdata=test, type="response")
+diags<-rbind(diags,class_diag(probs,truth))
+}
+diags%>%summarize_all(mean)
+```
+*The accuracy of the fit model is 0.6098077, sensitivity is 0.6942596, specificity = 0.5047015, percision is 0.6111905 and the AUC is 0.6283616. The When the 10-fold CV was performed, accuracy = 0.6204487, sensitivity = 0.727996, specificity = 0.5270256 and percision = 0.6301581. The AUC is 0.6980597 which is relatively similar to the average value of the diagnostics. LASSO was performed on the binary variable and all the other variables and the variables that were retained for the 10-fold CV are math and expenditure. The AUC when the 10-fold cross validation was performed. There was an decrease in AUC so that does not indicate a lot of overfitting.*

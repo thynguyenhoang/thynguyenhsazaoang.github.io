@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Thy Nguyen" />
+    
+    <link rel="shortcut icon" type="image/x-icon" href="../../img/favicon.ico">
+    <title>Project 2: Modeling, Testing, and Predicting</title>
+    <meta name="generator" content="Hugo 0.83.1" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="../../css/main.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,200bold,400old" />
+    
+    <!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+
+    
+  </head>
+
+  <body>
+    <div id="wrap">
+      
+      <nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="../../"><i class="fa fa-home"></i></a>
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <div class="navbar-collapse collapse" id="navbar">
+      <ul class="nav navbar-nav navbar-right">
+      
+        
+        <li><a href="../../post/">BLOG</a></li>
+        
+        <li><a href="../../projects/">PROJECTS</a></li>
+        
+        <li><a href="../../resume/">RESUME</a></li>
+        
+      
+      </ul>
+    </div>
+  </div>
+</nav>
+
+      <div class="container">
+        <div class="blog-post">
+          <h3>
+            <strong><a href="../../project/project2/">Project 2: Modeling, Testing, and Predicting</a></strong>
+          </h3>
+        </div>
+ 
+<div class="blog-title">
+          <h4>
+         January 1, 0001 
+            &nbsp;&nbsp;
+            
+          </h4>
+        </div>
+
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="blogpost">
+              
+
+
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>The data I chose to use is called “Stud”. This data set includes 395 observations and the data were obtained in a survey of students math and portuguese language courses in secondary school. It contains a lot of interesting social, gender and study information about students and their alcohol consumption in regards to these variables. There are 30 variables in total, some are age, school, sex, family size, parent’s cohabitation status (Pstatus), number of past class failures(failures),weekend alcohol consumption (Walc,numeric: from 1 - very low to 5 - very high), etc.
+## MANOVA Testing</p>
+<pre class="r"><code>stud &lt;- read.csv(&quot;stud.csv&quot;)
+stud &lt;- data.frame(stud)
+man1 &lt;- manova(cbind(age, absences) ~ Walc, data = stud)
+summary(man1)</code></pre>
+<pre><code>##            Df   Pillai approx F num Df den Df   Pr(&gt;F)   
+## Walc        1 0.027574   5.5577      2    392 0.004168 **
+## Residuals 393                                            
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>summary.aov(man1)</code></pre>
+<pre><code>##  Response age :
+##              Df Sum Sq Mean Sq F value  Pr(&gt;F)  
+## Walc          1   8.82  8.8236  5.4806 0.01973 *
+## Residuals   393 632.72  1.6100                  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+##  Response absences :
+##              Df  Sum Sq Mean Sq F value   Pr(&gt;F)   
+## Walc          1   468.8  468.76  7.4382 0.006671 **
+## Residuals   393 24766.8   63.02                    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>pairwise.t.test(stud$age, stud$Walc, p.adj = &quot;none&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  stud$age and stud$Walc 
+## 
+##   1      2      3      4     
+## 2 0.0211 -      -      -     
+## 3 0.0055 0.6460 -      -     
+## 4 0.4418 0.2856 0.1460 -     
+## 5 0.0249 0.4935 0.7234 0.1506
+## 
+## P value adjustment method: none</code></pre>
+<pre class="r"><code>pairwise.t.test(stud$absences, stud$Walc, p.adj = &quot;none&quot;)</code></pre>
+<pre><code>## 
+##  Pairwise comparisons using t tests with pooled SD 
+## 
+## data:  stud$absences and stud$Walc 
+## 
+##   1      2      3      4     
+## 2 0.8049 -      -      -     
+## 3 0.1534 0.1383 -      -     
+## 4 0.0071 0.0081 0.1806 -     
+## 5 0.2129 0.1836 0.7886 0.4410
+## 
+## P value adjustment method: none</code></pre>
+<pre class="r"><code>library(rstatix)
+group &lt;- stud$Walc
+X &lt;- stud %&gt;% select(age, absences)
+sapply(split(X, group), mshapiro_test)</code></pre>
+<pre><code>##           1            2            3            4            5          
+## statistic 0.592601     0.8780099    0.6961741    0.8092928    0.8725246  
+## p.value   9.437798e-19 8.692424e-07 1.410584e-11 1.195218e-06 0.002758394</code></pre>
+<p><em>I conducted 1 MANOVA, 1 ANOVA, and 2 t-tests. The MANOVA provided significant differences among the individual students for at least once of numerical variables. Pillai = 0.027574, F = 5.5577 , and p = 0.004168. Univariate ANOVAs were performed as a follow-up and for age the statistics are the following: F = 5.4806 and p = 0.01973. For absences, the statistics are the following: F = 7.4382 and p = 0.006671. Pairwise comparisons (t-tests) were also conducted and since age and absences differed.</em></p>
+</div>
+<div id="randomisation-test" class="section level2">
+<h2>Randomisation Test</h2>
+<pre class="r"><code>library(tidyverse)
+library(vegan)
+stud %&gt;% group_by(sex) %&gt;% summarise(means = mean(Walc)) %&gt;% 
+    summarise(mean_diff = diff(means))</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   mean_diff
+##       &lt;dbl&gt;
+## 1     0.706</code></pre>
+<pre class="r"><code>rand_dist &lt;- vector()
+for (i in 1:5000) {
+    new &lt;- data.frame(Walc = sample(stud$Walc), sex = stud$sex)
+    rand_dist[i] &lt;- mean(new[new$sex == &quot;M&quot;, ]$Walc) - 
+        mean(new[new$sex == &quot;F&quot;, ]$Walc)
+}
+{
+    hist(rand_dist, main = &quot;&quot;, ylab = &quot;&quot;)
+    abline(v = c(-0.119127, 0.119127), col = &quot;blue&quot;)
+}</code></pre>
+<p><img src="../../project/project2_files/figure-html/unnamed-chunk-2-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>mean(rand_dist &gt; 0.119127 | rand_dist &lt; -0.119127)</code></pre>
+<pre><code>## [1] 0.341</code></pre>
+<p><em>H0 is The amount of weekend alcohol consumption among individuals is the same for males and females. HA: The amount of weekend alcohol consumption among individuals is not the same for males and females. The calculated p-value is 0.3486, therefore, H0 is rejected.</em></p>
+</div>
+<div id="linear-regression-model" class="section level2">
+<h2>Linear Regression Model</h2>
+<pre class="r"><code>library(lmtest)
+library(sandwich)
+stud$freetime &lt;- stud$freetime - mean(stud$freetime)
+stud$goout &lt;- stud$goout - mean(stud$goout)
+fit1 &lt;- lm(goout ~ sex * freetime, data = stud)
+summary(fit1)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = goout ~ sex * freetime, data = stud)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -2.82879 -0.85554 -0.02498  0.68393  2.77882 
+## 
+## Coefficients:
+##               Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)    0.01075    0.07615   0.141    0.888    
+## sexM           0.02041    0.11083   0.184    0.854    
+## freetime       0.40190    0.07873   5.105 5.18e-07 ***
+## sexM:freetime -0.17164    0.11093  -1.547    0.123    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 1.068 on 391 degrees of freedom
+## Multiple R-squared:  0.08689,    Adjusted R-squared:  0.07989 
+## F-statistic:  12.4 on 3 and 391 DF,  p-value: 9.155e-08</code></pre>
+<pre class="r"><code>coef(fit1)</code></pre>
+<pre><code>##   (Intercept)          sexM      freetime sexM:freetime 
+##    0.01074606    0.02041386    0.40190237   -0.17163545</code></pre>
+<pre class="r"><code>stud %&gt;% ggplot(aes(goout, freetime)) + geom_point() + 
+    geom_smooth(method = &quot;lm&quot;, se = F)</code></pre>
+<p><img src="../../project/project2_files/figure-html/unnamed-chunk-3-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>cor(stud$freetime, stud$goout)</code></pre>
+<pre><code>## [1] 0.2850187</code></pre>
+<pre class="r"><code>res &lt;- fit1$residuals
+fitvals &lt;- fit1$fitted.values
+ggplot() + geom_point(aes(fitvals, res)) + geom_hline(yintercept = 0, 
+    color = &quot;red&quot;)</code></pre>
+<p><img src="../../project/project2_files/figure-html/unnamed-chunk-3-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggplot() + geom_histogram(aes(res))</code></pre>
+<p><img src="../../project/project2_files/figure-html/unnamed-chunk-3-3.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggplot() + geom_qq(aes(sample = res)) + geom_qq()</code></pre>
+<p><img src="../../project/project2_files/figure-html/unnamed-chunk-3-4.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>coeftest(fit1)[, 1:2]</code></pre>
+<pre><code>##                  Estimate Std. Error
+## (Intercept)    0.01074606 0.07614917
+## sexM           0.02041386 0.11082571
+## freetime       0.40190237 0.07872967
+## sexM:freetime -0.17163545 0.11093197</code></pre>
+<pre class="r"><code>coeftest(fit1, vcov = vcovHC(fit1))[, 1:2]</code></pre>
+<pre><code>##                  Estimate Std. Error
+## (Intercept)    0.01074606 0.07541493
+## sexM           0.02041386 0.10958635
+## freetime       0.40190237 0.08555761
+## sexM:freetime -0.17163545 0.12262210</code></pre>
+<pre class="r"><code>fit &lt;- lm(goout ~ freetime, data = stud)
+SST &lt;- sum((stud$freetime - mean(stud$freetime))^2)
+SST &lt;- sum((stud$freetime - mean(stud$freetime))^2)
+SSR &lt;- sum((fit$fitted.values - mean(stud$freetime))^2)
+SSE &lt;- sum(fit$residuals^2)
+SSR/SST</code></pre>
+<pre><code>## [1] 0.1009121</code></pre>
+<p><em>The coefficient was positive, so this would indicate that the when the go out variable (x-axis) increases, the mean of the free time variable (y-axis) will also increase. A ggplot was created to show the interactions between the two variables that have had their mean centered according to the rubric. Homoskedasticity, normality and linearity was violated. My model explains 99.42% of the variation outcome.</em></p>
+</div>
+<div id="bootstrap-linear-regression-model" class="section level2">
+<h2>Bootstrap Linear Regression Model:</h2>
+<pre class="r"><code>sampl &lt;- replicate(5000, {
+    boot_dis &lt;- boot_dis &lt;- stud[sample(nrow(stud), 
+        replace = TRUE), ]
+    fit &lt;- lm(goout ~ sex * freetime, data = boot_dis)
+    coef(fit)
+})
+sampl %&gt;% t %&gt;% as.data.frame %&gt;% summarize_all(sd)</code></pre>
+<pre><code>##   (Intercept)      sexM   freetime sexM:freetime
+## 1  0.07541821 0.1083887 0.08394555     0.1213052</code></pre>
+<p><em>The standard error for the bootstrap is the highest.</em></p>
+</div>
+<div id="logistic-regression-model" class="section level2">
+<h2>Logistic Regression Model</h2>
+<pre class="r"><code>library(lmtest)
+library(plotROC)
+data &lt;- stud %&gt;% mutate(y = ifelse(sex == &quot;F&quot;, 1, 0))
+head(data)</code></pre>
+<pre><code>##   school sex age address famsize Pstatus Medu Fedu    Mjob    Fjob reason
+## 1     GP   F  18       U     GT3       A    4    4 at_home teacher course
+## 2     GP   F  17       U     GT3       T    1    1 at_home   other course
+##   guardian traveltime studytime failures schoolsup famsup paid activities
+## 1   mother          2         2        0       yes     no   no         no
+## 2   father          1         2        0        no    yes   no         no
+##   nursery higher internet romantic famrel  freetime      goout Dalc Walc health
+## 1     yes    yes       no       no      4 -0.235443  0.8911392    1    1      3
+## 2      no    yes      yes       no      5 -0.235443 -0.1088608    1    1      3
+##   absences G1 G2 G3 y
+## 1        6  5  6  6 1
+## 2        4  5  5  6 1
+##  [ reached &#39;max&#39; / getOption(&quot;max.print&quot;) -- omitted 4 rows ]</code></pre>
+<pre class="r"><code>ft &lt;- glm(y ~ studytime, data = data, , family = binomial(link = &quot;logit&quot;))
+coeftest(ft)</code></pre>
+<pre><code>## 
+## z test of coefficients:
+## 
+##             Estimate Std. Error z value  Pr(&gt;|z|)    
+## (Intercept) -1.53620    0.29753 -5.1632 2.427e-07 ***
+## studytime    0.81939    0.14145  5.7928 6.923e-09 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>exp(coef(fit1))</code></pre>
+<pre><code>##   (Intercept)          sexM      freetime sexM:freetime 
+##     1.0108040     1.0206236     1.4946654     0.8422862</code></pre>
+<pre class="r"><code>logistic &lt;- function(x) {
+    exp(x)/(1 + exp(x))
+}
+# confusion matrix
+table(truth = data$sex, prediction = data$Walc &gt; 1) %&gt;% 
+    addmargins</code></pre>
+<pre><code>##      prediction
+## truth FALSE TRUE Sum
+##   F      94  114 208
+##   M      57  130 187
+##   Sum   151  244 395</code></pre>
+<pre class="r"><code># accuracy
+(114 + 130)/395</code></pre>
+<pre><code>## [1] 0.6177215</code></pre>
+<pre class="r"><code># specificity
+130/187</code></pre>
+<pre><code>## [1] 0.6951872</code></pre>
+<pre class="r"><code># sensitivity
+114/208</code></pre>
+<pre><code>## [1] 0.5480769</code></pre>
+<pre class="r"><code># precision
+114/244</code></pre>
+<pre><code>## [1] 0.4672131</code></pre>
+<pre class="r"><code># AUC
+widths &lt;- diff(data$y)
+heights &lt;- vector()
+for (i in 1:100) heights[i] &lt;- data$y[i] + data$y[i + 
+    1]
+AUC &lt;- sum(heights * widths/2)
+AUC %&gt;% round(3)</code></pre>
+<pre><code>## [1] -3.5</code></pre>
+<pre class="r"><code>stud$logit &lt;- predict(ft, type = &quot;link&quot;)
+stud %&gt;% ggplot() + geom_density(aes(logit, color = sex, 
+    fill = sex), alpha = 0.4) + theme(legend.position = c(0.3, 
+    0.6)) + geom_vline(xintercept = 2) + xlab(&quot;logit (log-odds)&quot;) + 
+    geom_rug(aes(logit, color = sex))</code></pre>
+<p><img src="../../project/project2_files/figure-html/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># ROC
+library(plotROC)
+ROCplot &lt;- ggplot(data) + geom_roc(aes(d = y, m = Walc), 
+    n.cuts = 0)
+ROCplot</code></pre>
+<p><img src="../../project/project2_files/figure-html/unnamed-chunk-5-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>calc_auc(ROCplot)</code></pre>
+<pre><code>##   PANEL group       AUC
+## 1     1    -1 0.3614382</code></pre>
+<p><em>The coefficient intercept estimate is -1.53620. A confusion matrix table was computed to calculate accuracy (0.6177215), sensitivity (0.5480769), specificity (0.6951872) and precision (0.4672131). The AUC that was calculated is -3.5, which is considered a bad AUC. A density plot was also generated to visualise accuracy, sensitivity, specificity and precision.</em>
+## Logistic Regression Model 2</p>
+<pre class="r"><code># fit model
+library(tidyverse)
+library(lmtest)
+library(pROC)
+library(glmnet)
+class_diag &lt;- function(probs, truth) {
+    
+    tab &lt;- table(factor(probs &gt; 0.5, levels = c(&quot;FALSE&quot;, 
+        &quot;TRUE&quot;)), truth)
+    acc = sum(diag(tab))/sum(tab)
+    sens = tab[2, 2]/colSums(tab)[2]
+    spec = tab[1, 1]/colSums(tab)[1]
+    ppv = tab[2, 2]/rowSums(tab)[2]
+    
+    if (is.numeric(truth) == FALSE &amp; is.logical(truth) == 
+        FALSE) 
+        truth &lt;- as.numeric(truth) - 1
+    
+    # CALCULATE EXACT AUC
+    ord &lt;- order(probs, decreasing = TRUE)
+    probs &lt;- probs[ord]
+    truth &lt;- truth[ord]
+    
+    TPR = cumsum(truth)/max(1, sum(truth))
+    FPR = cumsum(!truth)/max(1, sum(!truth))
+    
+    dup &lt;- c(probs[-1] &gt;= probs[-length(probs)], FALSE)
+    TPR &lt;- c(0, TPR[!dup], 1)
+    FPR &lt;- c(0, FPR[!dup], 1)
+    
+    n &lt;- length(TPR)
+    auc &lt;- sum(((TPR[-1] + TPR[-n])/2) * (FPR[-1] - 
+        FPR[-n]))
+    
+    data.frame(acc, sens, spec, ppv, auc)
+}
+
+k = 10
+data1 &lt;- data[sample(nrow(data)), ]
+folds &lt;- cut(seq(1:nrow(data)), breaks = k, labels = F)
+
+diags &lt;- NULL
+for (i in 1:k) {
+    train &lt;- data1[folds != i, ]
+    test &lt;- data1[folds == i, ]
+    truth &lt;- test$y
+    fit &lt;- glm(y ~ Walc, data = train, family = &quot;binomial&quot;)
+    probs &lt;- predict(fit, newdata = test, type = &quot;response&quot;)
+    diags &lt;- rbind(diags, class_diag(probs, truth))
+}
+
+apply(diags, 2, mean)</code></pre>
+<pre><code>##       acc      sens      spec       ppv       auc 
+## 0.6105128 0.6997018 0.5011697 0.6097578 0.6288954</code></pre>
+<pre class="r"><code># 10-fold
+k = 10
+data &lt;- stud %&gt;% sample_frac
+data$binary &lt;- ifelse(data$sex == &quot;F&quot;, 1, 0)
+folds &lt;- ntile(1:nrow(data), n = 10)
+diags &lt;- NULL
+for (i in 1:k) {
+    train &lt;- data[folds != i, ]
+    test &lt;- data[folds == i, ]
+    truth &lt;- test$binary
+    fit &lt;- glm(binary ~ studytime + Medu + traveltime + 
+        famrel + freetime + goout + Dalc + absences, 
+        data = train, family = &quot;binomial&quot;)
+    probs &lt;- predict(fit, newdata = test, type = &quot;response&quot;)
+    diags &lt;- rbind(diags, class_diag(probs, truth))
+}
+diags %&gt;% summarize_all(mean)</code></pre>
+<pre><code>##        acc      sens      spec       ppv       auc
+## 1 0.693141 0.7627409 0.6247412 0.6871152 0.7487309</code></pre>
+<pre class="r"><code># LASSO
+data$binary &lt;- ifelse(data$sex == &quot;F&quot;, 1, 0)
+y &lt;- as.matrix(data$binary)
+x &lt;- model.matrix(binary ~ studytime + Medu + traveltime + 
+    famrel + freetime + goout + Dalc + absences, data = data)[, 
+    -1]
+head(x)</code></pre>
+<pre><code>##   studytime Medu traveltime famrel  freetime      goout Dalc absences
+## 1         2    4          1      2  0.764557  0.8911392    2        6
+## 2         2    4          1      4 -0.235443 -0.1088608    1        2
+## 3         3    3          1      4 -0.235443 -0.1088608    1        0
+## 4         1    3          1      4 -0.235443 -1.1088608    3        8
+## 5         2    2          1      3 -2.235443 -1.1088608    1        6
+## 6         2    2          1      5  0.764557  0.8911392    1        0</code></pre>
+<pre class="r"><code>x &lt;- scale(x)
+head(x)</code></pre>
+<pre><code>##     studytime       Medu traveltime      famrel   freetime       goout
+## 1 -0.04223229  1.1424068 -0.6424347 -2.16838804  0.7654280  0.80046413
+## 2 -0.04223229  1.1424068 -0.6424347  0.06211528 -0.2357113 -0.09778397
+## 3  1.14932149  0.2289439 -0.6424347  0.06211528 -0.2357113 -0.09778397
+## 4 -1.23378606  0.2289439 -0.6424347  0.06211528 -0.2357113 -0.99603207
+## 5 -0.04223229 -0.6845191 -0.6424347 -1.05313638 -2.2379898 -0.99603207
+## 6 -0.04223229 -0.6845191 -0.6424347  1.17736694  0.7654280  0.80046413
+##         Dalc    absences
+## 1  0.5826465  0.03637833
+## 2 -0.5400138 -0.46342827
+## 3 -0.5400138 -0.71333156
+## 4  1.7053067  0.28628163
+## 5 -0.5400138  0.03637833
+## 6 -0.5400138 -0.71333156</code></pre>
+<pre class="r"><code>cv &lt;- cv.glmnet(x, y, family = &quot;binomial&quot;)
+lasso &lt;- glmnet(x, y, family = &quot;binomial&quot;, lambda = cv$lambda.1se)
+coef(lasso)</code></pre>
+<pre><code>## 9 x 1 sparse Matrix of class &quot;dgCMatrix&quot;
+##                     s0
+## (Intercept)  0.1111902
+## studytime    0.3848172
+## Medu         .        
+## traveltime   .        
+## famrel       .        
+## freetime    -0.2102993
+## goout        .        
+## Dalc        -0.2705305
+## absences     .</code></pre>
+<pre class="r"><code># 10-fold CV
+k = 10
+data &lt;- stud %&gt;% sample_frac
+folds &lt;- ntile(1:nrow(data), n = 10)
+data$binary &lt;- ifelse(data$sex == &quot;F&quot;, 1, 0)
+diags &lt;- NULL
+for (i in 1:k) {
+    train &lt;- data[folds != i, ]
+    test &lt;- data[folds == i, ]
+    truth &lt;- test$binary
+    fit &lt;- glm(binary ~ Dalc + Walc + freetime, data = train, 
+        family = &quot;binomial&quot;)
+    probs &lt;- predict(fit, newdata = test, type = &quot;response&quot;)
+    diags &lt;- rbind(diags, class_diag(probs, truth))
+}
+diags %&gt;% summarize_all(mean)</code></pre>
+<pre><code>##         acc      sens      spec       ppv       auc
+## 1 0.6223718 0.7304931 0.5062334 0.6179722 0.6795413</code></pre>
+<p><em>The accuracy of the fit model is 0.6098077, sensitivity is 0.6942596, specificity = 0.5047015, percision is 0.6111905 and the AUC is 0.6283616. The When the 10-fold CV was performed, accuracy = 0.6204487, sensitivity = 0.727996, specificity = 0.5270256 and percision = 0.6301581. The AUC is 0.6980597 which is relatively similar to the average value of the diagnostics. LASSO was performed on the binary variable and all the other variables and the variables that were retained for the 10-fold CV are math and expenditure. The AUC when the 10-fold cross validation was performed. There was an decrease in AUC so that does not indicate a lot of overfitting.</em></p>
+</div>
+
+            
+        <hr>         <div class="related-posts">
+                <h5>Related Posts</h5>
+                
+              </div> 
+            </div>
+          </div>
+
+   <hr>  <div class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+
+    (function() {
+      
+      
+      if (window.location.hostname == "localhost")
+        return;
+
+      var disqus_shortname = '';
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div> 
+        </div>
+      </div>
+    </div>
+
+    
+    <footer>
+  <div id="footer">
+    <div class="container">
+      <p class="text-muted">&copy; All rights reserved. Powered by <a href="https://gohugo.io/">Hugo</a> and
+      <a href="http://www.github.com/nurlansu/hugo-sustain/">sustain</a> with ♥</p>
+    </div>
+  </div>
+</footer>
+<div class="footer"></div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="../../js/docs.min.js"></script>
+<script src="../../js/main.js"></script>
+
+<script src="../../js/ie10-viewport-bug-workaround.js"></script>
+
+
+    
+  </body>
+</html>
